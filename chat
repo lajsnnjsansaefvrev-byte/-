@@ -2,12 +2,16 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer 
 
 ----------------------------------------------------------------------
--- ✅ تم إضافة رابط الويب هوك الخاص بك بنجاح هنا
-local DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1535840454019653733/CuM2Rx-jnKAFl7VZaqLuv1QWjLf0L88DEFKbgRCrrISPUSVc_9GsPLFOaTqbUCDN1mqT"
+-- ⚙️ تم دمج بيانات Appwrite الخاصة بك بنجاح
+local APPWRITE_PROJECT_ID = "fra-6a77f0d4001f553b760"
+local APPWRITE_DATABASE_ID = "ChatDatabase"
+local APPWRITE_COLLECTION_ID = "unset_messages"
+
+local APPWRITE_URL = "https://cloud.appwrite.io/v1/databases/" .. APPWRITE_DATABASE_ID .. "/collections/" .. APPWRITE_COLLECTION_ID .. "/documents"
 ----------------------------------------------------------------------
 
--- دالة إرسال الطلبات المتوافقة مع جميع المحاكيات الحديثة
 local requestFunction = (syn and syn.request) or (http and http.request) or request or http_request
+local HttpService = game:GetService("HttpService")
 
 -- إعداد واجهة المستخدم (GUI)
 local ScreenGui = Instance.new("ScreenGui")
@@ -22,7 +26,6 @@ local UIListLayout = Instance.new("UIListLayout")
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- تصميم الإطار الرئيسي
 MainFrame.Name = "BeroGlobalChat"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
@@ -33,16 +36,14 @@ MainFrame.Size = UDim2.new(0, 340, 0, 260)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- عنوان السكربت (سكربت بيرو)
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(15, 10, 20)
 Title.Size = UDim2.new(1, 0, 0, 33)
 Title.Font = Enum.Font.ArialBold
-Title.Text = "🔮 SCRIPT BERO | سكربت بيرو"
+Title.Text = "🔮 SCRIPT BERO | الشات العالمي"
 Title.TextColor3 = Color3.fromRGB(180, 100, 255)
 Title.TextSize = 14
 
--- حاوية عرض الرسائل
 ChatContainer.Parent = MainFrame
 ChatContainer.BackgroundTransparency = 1
 ChatContainer.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -55,13 +56,11 @@ UIListLayout.Parent = ChatContainer
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 6)
 
--- تحديث حجم الـ Canvas تلقائياً بناءً على حجم النصوص المضافة حديثاً
 UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ChatContainer.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
     ChatContainer.CanvasPosition = Vector2.new(0, UIListLayout.AbsoluteContentSize.Y)
 end)
 
--- خانة كتابة النص
 TextBox.Parent = MainFrame
 TextBox.BackgroundColor3 = Color3.fromRGB(35, 30, 45)
 TextBox.Position = UDim2.new(0.05, 0, 0.8, 0)
@@ -73,7 +72,6 @@ TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.TextSize = 13
 TextBox.TextXAlignment = Enum.TextXAlignment.Center
 
--- زر الإرسال
 SendButton.Parent = MainFrame
 SendButton.BackgroundColor3 = Color3.fromRGB(130, 50, 200)
 SendButton.Position = UDim2.new(0.72, 0, 0.8, 0)
@@ -83,7 +81,6 @@ SendButton.Text = "إرسال"
 SendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SendButton.TextSize = 13
 
--- زر إخفاء وإظهار الشات
 ToggleButton.Parent = ScreenGui
 ToggleButton.BackgroundColor3 = Color3.fromRGB(130, 50, 200)
 ToggleButton.Position = UDim2.new(0.02, 0, 0.1, 0)
@@ -94,10 +91,7 @@ ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 20
 
 local displayedMessages = {}
-local lastSendTime = 0
-local COOLDOWN_TIME = 2 -- وقت الانتظار بالثواني بين كل رسالة لحماية الويب هوك
 
--- وظيفة إضافة الرسائل للشات
 local function appendMessage(senderName, messageText)
     local msgKey = senderName .. ":" .. messageText
     if displayedMessages[msgKey] then return end
@@ -112,10 +106,7 @@ local function appendMessage(senderName, messageText)
     MessageLabel.TextXAlignment = Enum.TextXAlignment.Left
     MessageLabel.TextStrokeTransparency = 0.5
     MessageLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    
-    -- تفعيل RichText لدعم اللغة العربية وتنسيقات الألوان المتقدمة بنجاح
     MessageLabel.RichText = true 
-    -- جعل العنصر يتمدد رأسياً تلقائياً بناءً على حجم وطول النص المكتوب
     MessageLabel.AutomaticSize = Enum.AutomaticSize.Y 
     MessageLabel.Size = UDim2.new(1, -10, 0, 0)
 
@@ -129,57 +120,79 @@ local function appendMessage(senderName, messageText)
     end
 end
 
--- وظيفة إرسال الرسائل عبر الويب هوك
-local function broadcastMessage()
-    local text = TextBox.Text
-    if text == "" then return end
+-- إرسال الرسالة إلى Appwrite
+local function sendMessageToCloud(text)
+    if not requestFunction then return end
 
-    -- التحقق من نظام منع السبام (Cooldown) وحماية سيرفر الديسكورد
-    local currentTime = os.time()
-    if currentTime - lastSendTime < COOLDOWN_TIME then
-        appendMessage("System", "برجاء الانتظار قليلاً قبل إرسال الرسالة القادمة!")
-        return
-    end
-    
-    lastSendTime = currentTime
-    appendMessage(LocalPlayer.Name, text)
-    TextBox.Text = ""
+    local payload = HttpService:JSONEncode({
+        documentId = "unique()",
+        data = {
+            sender = LocalPlayer.Name,
+            ghat = text
+        }
+    })
 
     task.spawn(function()
-        if requestFunction then
-            local prefix = (LocalPlayer.Name == "vsgtxh0") and "[الادمن 👑] " or ""
-            local fullContent = prefix .. "**" .. LocalPlayer.Name .. "** عبر روبلوكس يقول: " .. text
-            
-            fullContent = fullContent:gsub('"', '\\"'):gsub('\n', ' ')
-
-            local payload = '{"content": "' .. fullContent .. '"}'
-
-            local success, err = pcall(function()
-                requestFunction({
-                    Url = DISCORD_WEBHOOK_URL,
-                    Method = "POST",
-                    Headers = {
-                        ["Content-Type"] = "application/json"
-                    },
-                    Body = payload
-                })
-            end)
-            
-            if not success then
-                appendMessage("System", "فشل إرسال الطلب، تأكد من صحة رابط الويب هوك.")
-            end
-        else
-            appendMessage("System", "خطأ: المحاكي (Executor) الحالي لا يدعم طلبات الـ HTTP.")
-        end
+        pcall(function()
+            requestFunction({
+                Url = APPWRITE_URL,
+                Method = "POST",
+                Headers = {
+                    ["Content-Type"] = "application/json",
+                    ["X-Appwrite-Project"] = APPWRITE_PROJECT_ID
+                },
+                Body = payload
+            })
+        end)
     end)
 end
 
--- ترحيب خاص يوضح اسم اللاعب الذي شغل السكربت
-appendMessage("System", "أهلاً بك يا " .. LocalPlayer.Name .. " في سكربت بيرو!")
-appendMessage("System", "تم تفعيل نظام الإرسال العالمي بنجاح.")
+-- جلب الرسائل من السحابة تلقائياً
+local function fetchGlobalMessages()
+    if not requestFunction then return end
 
--- ربط الأزرار والوظائف
-SendButton.MouseButton1Click:Connect(broadcastMessage)
+    local success, response = pcall(function()
+        return requestFunction({
+            Url = APPWRITE_URL .. "?queries[]=limit(20)&queries[]=orderDesc(\"$createdAt\")",
+            Method = "GET",
+            Headers = {
+                ["Content-Type"] = "application/json",
+                ["X-Appwrite-Project"] = APPWRITE_PROJECT_ID
+            }
+        })
+    end)
+
+    if success and response.Body then
+        local ok, data = pcall(function() return HttpService:JSONDecode(response.Body) end)
+        if ok and data and data.documents then
+            for i = #data.documents, 1, -1 do
+                local doc = data.documents[i]
+                if doc.sender and doc.ghat then
+                    appendMessage(doc.sender, doc.ghat)
+                end
+            end
+        end
+    end
+end
+
+SendButton.MouseButton1Click:Connect(function()
+    local text = TextBox.Text
+    if text ~= "" then
+        sendMessageToCloud(text)
+        TextBox.Text = ""
+    end
+end)
+
 ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- تشغيل حلقة الاستقبال المستمر كل ثانيتين
+task.spawn(function()
+    appendMessage("System", "أهلاً بك يا " .. LocalPlayer.Name .. " في شات بيرو العالمي!")
+    appendMessage("System", "تم الاتصال بالسيرفر السحابي بنجاح.")
+    while true do
+        fetchGlobalMessages()
+        task.wait(2)
+    end
 end)
