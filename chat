@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer 
 
 ----------------------------------------------------------------------
--- ⚙️ تم دمج بيانات Appwrite الخاصة بك بنجاح
+-- ⚙️ بيانات اتصال Appwrite
 local APPWRITE_PROJECT_ID = "fra-6a77f0d4001f553b760"
 local APPWRITE_DATABASE_ID = "ChatDatabase"
 local APPWRITE_COLLECTION_ID = "unset_messages"
@@ -122,7 +122,10 @@ end
 
 -- إرسال الرسالة إلى Appwrite
 local function sendMessageToCloud(text)
-    if not requestFunction then return end
+    if not requestFunction then 
+        appendMessage("System", "خطأ: المحاكي لا يدعم طلبات HTTP")
+        return 
+    end
 
     local payload = HttpService:JSONEncode({
         documentId = "unique()",
@@ -133,8 +136,8 @@ local function sendMessageToCloud(text)
     })
 
     task.spawn(function()
-        pcall(function()
-            requestFunction({
+        local success, res = pcall(function()
+            return requestFunction({
                 Url = APPWRITE_URL,
                 Method = "POST",
                 Headers = {
@@ -144,10 +147,14 @@ local function sendMessageToCloud(text)
                 Body = payload
             })
         end)
+
+        if not success or (res and res.StatusCode and res.StatusCode >= 400) then
+            appendMessage("System", "فشل الإرسال! كود الخطأ: " .. tostring(res and res.StatusCode or "Network Error"))
+        end
     end)
 end
 
--- جلب الرسائل من السحابة تلقائياً
+-- جلب الرسائل من السحابة
 local function fetchGlobalMessages()
     if not requestFunction then return end
 
@@ -162,7 +169,7 @@ local function fetchGlobalMessages()
         })
     end)
 
-    if success and response.Body then
+    if success and response and response.Body then
         local ok, data = pcall(function() return HttpService:JSONDecode(response.Body) end)
         if ok and data and data.documents then
             for i = #data.documents, 1, -1 do
@@ -170,6 +177,10 @@ local function fetchGlobalMessages()
                 if doc.sender and doc.ghat then
                     appendMessage(doc.sender, doc.ghat)
                 end
+            end
+        else
+            if response.StatusCode and response.StatusCode >= 400 then
+                appendMessage("System", "خطأ جلب البيانات: " .. tostring(response.StatusCode))
             end
         end
     end
@@ -187,10 +198,8 @@ ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
 end)
 
--- تشغيل حلقة الاستقبال المستمر كل ثانيتين
 task.spawn(function()
-    appendMessage("System", "أهلاً بك يا " .. LocalPlayer.Name .. " في شات بيرو العالمي!")
-    appendMessage("System", "تم الاتصال بالسيرفر السحابي بنجاح.")
+    appendMessage("System", "جاري الاتصال بالسيرفر...")
     while true do
         fetchGlobalMessages()
         task.wait(2)
