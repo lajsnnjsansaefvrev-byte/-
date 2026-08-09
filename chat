@@ -1,15 +1,15 @@
--- ط³ظƒط±ط¨طھ ط§ظ„ط´ط§طھ ط§ظ„ط¹ط§ظ„ظ…ظٹ ط§ظ„ظ…ط·ظˆط± - ظ†ط³ط®ط© ظ…طµط­ط­ط© ظˆظ…ط­ط¯ط«ط© ظ„ظ€ Delta
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer 
 
----------------------------------------------------------
-local DISCORD_WEBHOOK_URL = "https://canary.discord.com/api/webhooks/1535840454019653733/CuM2Rx-jnKAFl7VZaqLuv1QWjLf0L88DEFKbgRCrrISPUSVc_9GsPLFOaTqbUCDN1mqT"
----------------------------------------------------------
+----------------------------------------------------------------------
+-- ✅ تم إضافة رابط الويب هوك الخاص بك بنجاح هنا
+local DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1535840454019653733/CuM2Rx-jnKAFl7VZaqLuv1QWjLf0L88DEFKbgRCrrISPUSVc_9GsPLFOaTqbUCDN1mqT"
+----------------------------------------------------------------------
 
--- ط¯ط§ظ„ط© ط¥ط±ط³ط§ظ„ ط§ظ„ط·ظ„ط¨ط§طھ ط§ظ„ظ…طھظˆط§ظپظ‚ط© ظ…ط¹ Delta ظˆط¬ظ…ظٹط¹ ط§ظ„ظ…ط­ط§ظƒظٹط§طھ
+-- دالة إرسال الطلبات المتوافقة مع جميع المحاكيات الحديثة
 local requestFunction = (syn and syn.request) or (http and http.request) or request or http_request
 
--- ط¥ط¹ط¯ط§ط¯ ظˆط§ط¬ظ‡ط© ط§ظ„ظ…ط³طھط®ط¯ظ… (GUI)
+-- إعداد واجهة المستخدم (GUI)
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
@@ -22,8 +22,8 @@ local UIListLayout = Instance.new("UIListLayout")
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- طھطµظ…ظٹظ… ط§ظ„ط¥ط·ط§ط± ط§ظ„ط±ط¦ظٹط³ظٹ
-MainFrame.Name = "Vsgtxh0GlobalChat"
+-- تصميم الإطار الرئيسي
+MainFrame.Name = "BeroGlobalChat"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
 MainFrame.BorderSizePixel = 2
@@ -33,16 +33,16 @@ MainFrame.Size = UDim2.new(0, 340, 0, 260)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
--- ط¹ظ†ظˆط§ظ† ط§ظ„ط³ظƒط±ط¨طھ
+-- عنوان السكربت (سكربت بيرو)
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(15, 10, 20)
 Title.Size = UDim2.new(1, 0, 0, 33)
 Title.Font = Enum.Font.ArialBold
-Title.Text = "ًں”® VSGTXH0 GLOBAL CHAT"
+Title.Text = "🔮 SCRIPT BERO | سكربت بيرو"
 Title.TextColor3 = Color3.fromRGB(180, 100, 255)
 Title.TextSize = 14
 
--- ط­ط§ظˆظٹط© ط¹ط±ط¶ ط§ظ„ط±ط³ط§ط¦ظ„
+-- حاوية عرض الرسائل
 ChatContainer.Parent = MainFrame
 ChatContainer.BackgroundTransparency = 1
 ChatContainer.Position = UDim2.new(0.05, 0, 0.15, 0)
@@ -55,41 +55,49 @@ UIListLayout.Parent = ChatContainer
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 6)
 
--- ط®ط§ظ†ط© ظƒطھط§ط¨ط© ط§ظ„ظ†طµ
+-- تحديث حجم الـ Canvas تلقائياً بناءً على حجم النصوص المضافة حديثاً
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ChatContainer.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    ChatContainer.CanvasPosition = Vector2.new(0, UIListLayout.AbsoluteContentSize.Y)
+end)
+
+-- خانة كتابة النص
 TextBox.Parent = MainFrame
 TextBox.BackgroundColor3 = Color3.fromRGB(35, 30, 45)
 TextBox.Position = UDim2.new(0.05, 0, 0.8, 0)
 TextBox.Size = UDim2.new(0.65, 0, 0, 35)
 TextBox.Font = Enum.Font.Arial
 TextBox.Text = ""
-TextBox.PlaceholderText = "ط§ظƒطھط¨ ط±ط³ط§ظ„ط© ط¹ط§ظ…ط© ظ„ظ„ظƒظ„..."
+TextBox.PlaceholderText = "اكتب رسالة عامة للكل..."
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.TextSize = 13
-TextBox.TextXAlignment = Enum.TextXAlignment.Right
+TextBox.TextXAlignment = Enum.TextXAlignment.Center
 
--- ط²ط± ط§ظ„ط¥ط±ط³ط§ظ„
+-- زر الإرسال
 SendButton.Parent = MainFrame
 SendButton.BackgroundColor3 = Color3.fromRGB(130, 50, 200)
 SendButton.Position = UDim2.new(0.72, 0, 0.8, 0)
 SendButton.Size = UDim2.new(0.23, 0, 0, 35)
 SendButton.Font = Enum.Font.ArialBold
-SendButton.Text = "ط¥ط±ط³ط§ظ„"
+SendButton.Text = "إرسال"
 SendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SendButton.TextSize = 13
 
--- ط²ط± ط¥ط®ظپط§ط، ظˆط¥ط¸ظ‡ط§ط± ط§ظ„ط´ط§طھ
+-- زر إخفاء وإظهار الشات
 ToggleButton.Parent = ScreenGui
 ToggleButton.BackgroundColor3 = Color3.fromRGB(130, 50, 200)
 ToggleButton.Position = UDim2.new(0.02, 0, 0.1, 0)
 ToggleButton.Size = UDim2.new(0, 40, 0, 40)
 ToggleButton.Font = Enum.Font.ArialBold
-ToggleButton.Text = "ًں’¬"
+ToggleButton.Text = "💬"
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleButton.TextSize = 20
 
 local displayedMessages = {}
+local lastSendTime = 0
+local COOLDOWN_TIME = 2 -- وقت الانتظار بالثواني بين كل رسالة لحماية الويب هوك
 
--- ظˆط¸ظٹظپط© ط¥ط¶ط§ظپط© ط§ظ„ط±ط³ط§ط¦ظ„ ظ„ظ„ظ€ GUI ط´ط§طھ
+-- وظيفة إضافة الرسائل للشات
 local function appendMessage(senderName, messageText)
     local msgKey = senderName .. ":" .. messageText
     if displayedMessages[msgKey] then return end
@@ -101,69 +109,76 @@ local function appendMessage(senderName, messageText)
     MessageLabel.Font = Enum.Font.ArialBold
     MessageLabel.TextSize = 14
     MessageLabel.TextWrapped = true
-    MessageLabel.TextXAlignment = Enum.TextXAlignment.Right
+    MessageLabel.TextXAlignment = Enum.TextXAlignment.Left
     MessageLabel.TextStrokeTransparency = 0.5
     MessageLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    
+    -- تفعيل RichText لدعم اللغة العربية وتنسيقات الألوان المتقدمة بنجاح
+    MessageLabel.RichText = true 
+    -- جعل العنصر يتمدد رأسياً تلقائياً بناءً على حجم وطول النص المكتوب
+    MessageLabel.AutomaticSize = Enum.AutomaticSize.Y 
+    MessageLabel.Size = UDim2.new(1, -10, 0, 0)
 
     if senderName == "vsgtxh0" then
-        MessageLabel.Text = messageText .. " :[ًں‘‘ ط§ظ„ط§ط¯ظ…ظ†] " .. senderName
-        MessageLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+        MessageLabel.Text = "<font color='rgb(255, 215, 0)'>" .. senderName .. " [الادمن 👑]: </font>" .. messageText
     elseif senderName == "System" then
-        MessageLabel.Text = messageText .. " :[âڑ™ï¸ڈ]"
-        MessageLabel.TextColor3 = Color3.fromRGB(180, 100, 255)
+        MessageLabel.Text = "<font color='rgb(180, 100, 255)'>[⚙️] " .. messageText .. "</font>"
     else
-        MessageLabel.Text = messageText .. " :" .. senderName
-        MessageLabel.TextColor3 = (senderName == LocalPlayer.Name) and Color3.fromRGB(255, 235, 50) or Color3.fromRGB(255, 255, 255)
+        local nameColor = (senderName == LocalPlayer.Name) and "rgb(255, 235, 50)" or "rgb(255, 255, 255)"
+        MessageLabel.Text = "<font color='" .. nameColor .. "'>" .. senderName .. ": </font>" .. messageText
     end
-
-    local textHeight = game:GetService("TextService"):GetTextSize(
-        MessageLabel.Text,
-        MessageLabel.TextSize,
-        MessageLabel.Font,
-        Vector2.new(ChatContainer.AbsoluteSize.X - 20, math.huge)
-    ).Y
-
-    MessageLabel.Size = UDim2.new(1, -10, 0, textHeight + 6)
-    ChatContainer.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
-    ChatContainer.CanvasPosition = Vector2.new(0, UIListLayout.AbsoluteContentSize.Y)
 end
 
--- ظˆط¸ظٹظپط© ط¥ط±ط³ط§ظ„ ط§ظ„ط±ط³ط§ط¦ظ„ ط¹ط¨ط± ط§ظ„ظˆظٹط¨ ظ‡ظˆظˆظƒ
+-- وظيفة إرسال الرسائل عبر الويب هوك
 local function broadcastMessage()
     local text = TextBox.Text
     if text == "" then return end
 
+    -- التحقق من نظام منع السبام (Cooldown) وحماية سيرفر الديسكورد
+    local currentTime = os.time()
+    if currentTime - lastSendTime < COOLDOWN_TIME then
+        appendMessage("System", "برجاء الانتظار قليلاً قبل إرسال الرسالة القادمة!")
+        return
+    end
+    
+    lastSendTime = currentTime
     appendMessage(LocalPlayer.Name, text)
     TextBox.Text = ""
 
     task.spawn(function()
         if requestFunction then
-            local prefix = (LocalPlayer.Name == "vsgtxh0") and "[ًں‘‘ ط§ظ„ط§ط¯ظ…ظ†] " or ""
-            local fullContent = prefix .. "**" .. LocalPlayer.Name .. "** ط¹ط¨ط± ط±ظˆط¨ظ„ظˆظƒط³ ظٹظ‚ظˆظ„: " .. text
+            local prefix = (LocalPlayer.Name == "vsgtxh0") and "[الادمن 👑] " or ""
+            local fullContent = prefix .. "**" .. LocalPlayer.Name .. "** عبر روبلوكس يقول: " .. text
             
-            -- طھظ†ط¸ظٹظپ ط§ظ„ظ†طµ ظ„ظ…ظ†ط¹ طھط®ط±ظٹط¨ ط§ظ„ظ€ JSON
             fullContent = fullContent:gsub('"', '\\"'):gsub('\n', ' ')
 
             local payload = '{"content": "' .. fullContent .. '"}'
 
-            requestFunction({
-                Url = DISCORD_WEBHOOK_URL,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = payload
-            })
+            local success, err = pcall(function()
+                requestFunction({
+                    Url = DISCORD_WEBHOOK_URL,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = payload
+                })
+            end)
+            
+            if not success then
+                appendMessage("System", "فشل إرسال الطلب، تأكد من صحة رابط الويب هوك.")
+            end
         else
-            appendMessage("System", "ط®ط·ط£: ط§ظ„ظ…ط­ط§ظƒظٹ ظ„ط§ ظٹط¯ط¹ظ… ط·ظ„ط¨ط§طھ ط§ظ„ظ€ HTTP")
+            appendMessage("System", "خطأ: المحاكي (Executor) الحالي لا يدعم طلبات الـ HTTP.")
         end
     end)
 end
 
--- ط§ظ„طھط±ط­ظٹط¨ ط§ظ„ظ…ط®طµطµ
-appendMessage("System", "طھظ… طھظپط¹ظٹظ„ ظ†ط¸ط§ظ… ط§ظ„ط¥ط±ط³ط§ظ„ ط¨ظ†ط¬ط§ط­ ظپظٹ Delta!")
+-- ترحيب خاص يوضح اسم اللاعب الذي شغل السكربت
+appendMessage("System", "أهلاً بك يا " .. LocalPlayer.Name .. " في سكربت بيرو!")
+appendMessage("System", "تم تفعيل نظام الإرسال العالمي بنجاح.")
 
--- ط±ط¨ط· ط§ظ„ط£ط²ط±ط§ط±
+-- ربط الأزرار والوظائف
 SendButton.MouseButton1Click:Connect(broadcastMessage)
 ToggleButton.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
